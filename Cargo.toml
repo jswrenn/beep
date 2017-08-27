@@ -5,6 +5,7 @@ authors = ["Jack Wrenn <me@jswrenn.com>"]
 description = "Beep the PC speaker"
 readme = "README.md"
 license = "MIT"
+repository = "https://github.com/jswrenn/beep"
 
 [dependencies]
 lazy_static = "0.2"
