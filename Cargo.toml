@@ -2,8 +2,9 @@
 name = "beep"
 version = "0.1.0"
 authors = ["Jack Wrenn <me@jswrenn.com>"]
-description = "Beep the PC speaker."
+description = "Beep the PC speaker"
 readme = "README.md"
+license = "MIT"
 
 [dependencies]
 lazy_static = "0.2"
