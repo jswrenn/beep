@@ -1,0 +1,11 @@
+[package]
+name = "beep"
+version = "0.1.0"
+authors = ["Jack Wrenn <me@jswrenn.com>"]
+description = "Beep the PC speaker."
+readme = "README.md"
+
+[dependencies]
+lazy_static = "0.2"
+dimensioned = "0.6"
+num-traits  = "0.1"
