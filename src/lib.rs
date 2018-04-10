@@ -11,13 +11,14 @@ use std::os::unix::io::AsRawFd;
 use num_traits::{Num, ToPrimitive};
 
 use dimensioned::si::Hertz;
+use dimensioned::dimensions::Frequency;
 
 lazy_static! {
-  static ref CONSOLE: File =
+  static ref DEVICE: File =
     OpenOptions::new()
       .append(true)
-      .open("/dev/console")
-      .expect("Could not open /dev/console:");
+      .open("/dev/tty0")
+      .expect("Could not open /dev/tty0");
 }
 
 const KIOCSOUND       : u64 = 0x4B2F;
@@ -45,11 +46,11 @@ const TIMER_FREQUENCY : u32 = 1193180;
 /// ```
 ///
 pub fn beep<F, N>(frequency: F)
-  where F: Into<Hertz<N>>,
+  where F: Frequency + Into<Hertz<N>>,
         N: Num + ToPrimitive
 {
   unsafe {
-    ioctl(CONSOLE.as_raw_fd(), KIOCSOUND,
+    ioctl(DEVICE.as_raw_fd(), KIOCSOUND,
       frequency.into().value_unsafe.to_u32()
         .and_then(|frequency|
           TIMER_FREQUENCY.checked_div(frequency))
