@@ -1,6 +1,6 @@
 [package]
 name = "beep"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Jack Wrenn <me@jswrenn.com>"]
 description = "Beep the PC speaker"
 readme = "README.md"
