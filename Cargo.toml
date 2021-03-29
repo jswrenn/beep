@@ -6,9 +6,8 @@ description = "Beep the PC speaker"
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/jswrenn/beep"
+edition = "2018"
 
 [dependencies]
-libc = "0.2"
+nix = "0.20"
 lazy_static = "1.0"
-dimensioned = "0.6"
-num-traits = {version = "0.2.2", default-features = false}

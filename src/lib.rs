@@ -1,58 +1,49 @@
-extern crate libc;
-#[macro_use]
-extern crate lazy_static;
-extern crate dimensioned;
-extern crate num_traits;
-
-use libc::ioctl;
+use nix::{self, ioctl_write_int_bad};
 use std::fs::{File, OpenOptions};
 use std::os::unix::io::AsRawFd;
-use num_traits::{Num, ToPrimitive};
+use lazy_static::lazy_static;
 
-use dimensioned::si::Hertz;
-use dimensioned::dimensions::Frequency;
+pub use nix::Error;
+
+const FILE            : &str = "/dev/console";
+const KIOCSOUND       : u64  = 0x4B2F;
+const TIMER_FREQUENCY : u32  = 1193180;
 
 lazy_static! {
-  static ref DEVICE: File =
-    OpenOptions::new()
-      .append(true)
-      .open("/dev/tty0")
-      .expect("Could not open /dev/tty0");
+    static ref DEVICE: File =
+        OpenOptions::new()
+            .append(true)
+            .open(FILE)
+            .expect(&format!("Could not open {}", FILE));
 }
 
-const KIOCSOUND       : u64 = 0x4B2F;
-const TIMER_FREQUENCY : u32 = 1193180;
+ioctl_write_int_bad!(kiocsound, KIOCSOUND);
 
-/// Play an indefinite tone of a given `frequency`.
+/// Play an indefinite tone of a given `hertz`.
 ///
 /// For instance:
 ///
 /// ```
-/// extern crate beep;
-/// extern crate dimensioned;
-///
-/// use std::{thread, time};
+/// use std::{thread, time::Duration};
 /// use beep::beep;
-/// use dimensioned::si;
 ///
 /// fn main() {
-///   beep(440. * si::HZ);
-///   thread::sleep(time::Duration::from_millis(500));
-///   beep(si::Hertz::new(880));
-///   thread::sleep(time::Duration::from_millis(500));
-///   beep(0. * si::HZ);
+///     beep(440);
+///     thread::sleep(Duration::from_millis(500));
+///     beep(880);
+///     thread::sleep(Duration::from_millis(500));
+///     beep(0);
 /// }
 /// ```
 ///
-pub fn beep<F, N>(frequency: F)
-  where F: Frequency + Into<Hertz<N>>,
-        N: Num + ToPrimitive
+pub fn beep(hertz: u16) -> nix::Result<()>
 {
-  unsafe {
-    ioctl(DEVICE.as_raw_fd(), KIOCSOUND,
-      frequency.into().value_unsafe.to_u32()
-        .and_then(|frequency|
-          TIMER_FREQUENCY.checked_div(frequency))
-        .unwrap_or(0));
-  }
+    let period_in_clock_cycles =
+        TIMER_FREQUENCY.checked_div(hertz as u32).unwrap_or(0);
+
+    unsafe {
+        kiocsound(DEVICE.as_raw_fd(), period_in_clock_cycles as i32)?;
+    }
+
+    Ok(())
 }
